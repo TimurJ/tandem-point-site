@@ -1,0 +1,5 @@
+# pnpm 11 blocks dependency build scripts by default. esbuild's postinstall links the
+# platform binary that Vite (and therefore `astro build`) needs, so it is allowed explicitly.
+# Nothing else is allowed.
+allowBuilds:
+  esbuild: true

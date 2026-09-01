@@ -1,0 +1,150 @@
+---
+// Read at build time and passed to the client through a data attribute rather than referenced
+// directly inside the <script>. Referencing import.meta.env in the client script lets Vite inline
+// the literal `undefined` when the variable is unset, and the minifier then strips the whole
+// submit path as dead code — so an unconfigured build would ship a form whose success branch does
+// not exist. A data attribute keeps one stable bundle whatever the environment.
+// The value is public by design: Formspree endpoints are meant to be visible in the page.
+const formspreeEndpoint = import.meta.env.PUBLIC_FORMSPREE_ENDPOINT ?? '';
+
+const fields = [
+  { id: 'name', label: 'Name', type: 'text', autocomplete: 'name' },
+  { id: 'company', label: 'Company', type: 'text', autocomplete: 'organization' },
+  { id: 'email', label: 'Email', type: 'email', autocomplete: 'email' },
+];
+---
+
+<section
+  id="contact"
+  class="mx-auto max-w-page border-t border-border px-6 py-section-sm md:px-8 md:py-section"
+  aria-labelledby="contact-heading"
+>
+  <h2 id="contact-heading" class="wordmark text-h2 text-text">Get in touch</h2>
+
+  <p class="mt-4 max-w-[54ch] text-body text-muted">
+    Tell us about your product and the developers you want in front of it. We read and reply to
+    everything.
+  </p>
+
+  <form id="contact-form" class="mt-10 max-w-[34rem]" data-endpoint={formspreeEndpoint}>
+    <div class="grid gap-5">
+      {
+        fields.map((field) => (
+          <div>
+            <label for={field.id} class="block text-small text-text">
+              {field.label}
+            </label>
+            <input
+              id={field.id}
+              name={field.id}
+              type={field.type}
+              autocomplete={field.autocomplete}
+              required
+              class="mt-2 w-full rounded-[var(--radius-card)] border border-control-border bg-surface px-3 py-2.5 text-body text-text outline-none transition-colors focus:border-accent"
+            />
+          </div>
+        ))
+      }
+
+      <div>
+        <label for="message" class="block text-small text-text">Message</label>
+        <textarea
+          id="message"
+          name="message"
+          rows="5"
+          required
+          class="mt-2 w-full resize-y rounded-[var(--radius-card)] border border-control-border bg-surface px-3 py-2.5 text-body text-text outline-none transition-colors focus:border-accent"
+        ></textarea>
+      </div>
+    </div>
+
+    <button
+      type="submit"
+      id="contact-submit"
+      class="mt-8 inline-flex items-center rounded-[var(--radius-card)] bg-accent px-5 py-3 text-small font-medium text-accent-ink transition-opacity hover:opacity-90 disabled:opacity-60"
+    >
+      Send message
+    </button>
+  </form>
+
+  <p
+    id="contact-status"
+    role="status"
+    aria-live="polite"
+    tabindex="-1"
+    class="mt-6 max-w-[54ch] text-body text-muted empty:mt-0"
+  >
+  </p>
+
+  <p class="mt-8 text-small text-muted">
+    or email <a
+      href="mailto:hello@tandempoint.io"
+      class="text-accent underline underline-offset-4 transition-opacity hover:opacity-80"
+      >hello@tandempoint.io</a
+    >
+  </p>
+</section>
+
+<script>
+  const form = document.getElementById('contact-form') as HTMLFormElement | null;
+  const status = document.getElementById('contact-status');
+  const submit = document.getElementById('contact-submit') as HTMLButtonElement | null;
+
+  const GENERIC_ERROR =
+    'Something went wrong sending that. Email hello@tandempoint.io and we will pick it up there.';
+
+  if (form && status && submit) {
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      if (!form.reportValidity()) return;
+
+      // Read per-submit rather than once at load: same result in production, and it keeps the
+      // branch reachable from a test that sets the attribute.
+      const endpoint = form.dataset.endpoint;
+
+      status.textContent = '';
+      status.classList.remove('text-accent');
+      submit.disabled = true;
+      submit.textContent = 'Sending…';
+
+      const fail = (message: string) => {
+        status.textContent = message;
+        status.classList.remove('text-accent');
+        submit.disabled = false;
+        submit.textContent = 'Send message';
+        status.focus();
+      };
+
+      if (!endpoint) {
+        fail(GENERIC_ERROR);
+        return;
+      }
+
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          body: new FormData(form),
+          headers: { Accept: 'application/json' },
+        });
+
+        if (response.ok) {
+          form.hidden = true;
+          status.textContent = 'Thanks — your message is in. We will reply from hello@tandempoint.io.';
+          status.classList.add('text-accent');
+          status.focus();
+          return;
+        }
+
+        const data = await response.json().catch(() => null);
+        const messages = Array.isArray(data?.errors)
+          ? data.errors.map((error: { message?: string }) => error.message).filter(Boolean)
+          : [];
+
+        fail(messages.length > 0 ? messages.join(', ') : GENERIC_ERROR);
+      } catch {
+        fail(GENERIC_ERROR);
+      }
+    });
+  }
+</script>

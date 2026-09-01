@@ -1,0 +1,43 @@
+---
+const columns = [
+  {
+    title: 'Brands',
+    lines: [
+      'Developer tools, infrastructure, AI tooling, and SaaS sold to engineers.',
+      'Products a creator can open, use on camera, and have something honest to say about.',
+      'Usually DevRel or marketing leads who have run paid channels before and want the same rigour applied here.',
+    ],
+  },
+  {
+    title: 'Creators',
+    lines: [
+      'Mid-size to large technical creators on YouTube whose audience is working developers.',
+      'People who explain how something is built, not people teaching an audience to start coding.',
+      'We look for creators who turn sponsors down, because those are the ones whose recommendations still carry weight.',
+    ],
+  },
+];
+---
+
+<section
+  id="who-we-work-with"
+  class="mx-auto max-w-page border-t border-border px-6 py-section-sm md:px-8 md:py-section"
+  aria-labelledby="who-we-work-with-heading"
+>
+  <h2 id="who-we-work-with-heading" class="wordmark text-h2 text-text">Who we work with</h2>
+
+  <div class="mt-12 grid gap-10 md:grid-cols-2 md:gap-16">
+    {
+      columns.map((column) => (
+        <div class="border-t border-border pt-6">
+          <h3 class="wordmark text-lead text-text">{column.title}</h3>
+          <div class="mt-4 space-y-3 text-body text-muted">
+            {column.lines.map((line) => (
+              <p>{line}</p>
+            ))}
+          </div>
+        </div>
+      ))
+    }
+  </div>
+</section>
