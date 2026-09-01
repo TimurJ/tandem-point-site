@@ -1,0 +1,17 @@
+{
+  // Static-assets-only Worker: dist/ is uploaded and served from the edge. There is no `main`
+  // and no Worker script — Cloudflare's own Astro guide specifies exactly this shape for a
+  // static build. This is the Workers path, not the (legacy) Pages one.
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "tandem-point-site",
+  "compatibility_date": "2026-09-02",
+  "send_metrics": false,
+  "assets": {
+    "directory": "./dist"
+
+    // html_handling and not_found_handling are both left at their documented defaults
+    // ("auto-trailing-slash" and "none"). Do NOT set not_found_handling to
+    // "single-page-application": it returns index.html with a 200 for every unknown URL, which
+    // would let search engines index infinite duplicates of the homepage.
+  }
+}

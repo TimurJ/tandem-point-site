@@ -1,5 +1,11 @@
-# pnpm 11 blocks dependency build scripts by default. esbuild's postinstall links the
-# platform binary that Vite (and therefore `astro build`) needs, so it is allowed explicitly.
-# Nothing else is allowed.
+# pnpm 11 blocks dependency build scripts by default, and errors on any that are neither
+# allowed nor explicitly declined.
+#
+# esbuild's postinstall links the platform binary that Vite (and therefore `astro build`) needs.
+#
+# workerd is wrangler's runtime, pulled in transitively. Its postinstall downloads a ~150 MB
+# binary over the network at install time. It is declined, not allowed: `wrangler deploy` for a
+# static-assets Worker was tested with the script blocked and the binary absent, and works.
 allowBuilds:
   esbuild: true
+  workerd: false

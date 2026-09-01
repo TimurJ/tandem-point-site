@@ -7,7 +7,7 @@ vanilla script drives the contact form.
 
 ## Requirements
 
-- Node >= 22.12.0 (Astro 7's floor)
+- Node 24 (pinned via `.node-version`; Astro 7's floor is 22.12.0, but 24 is the current Active LTS)
 - pnpm 11 (pinned via `packageManager`)
 
 ## Local development
@@ -19,7 +19,8 @@ pnpm dev
 ```
 
 `pnpm install` needs to run esbuild's postinstall script, which pnpm 11 blocks by default. That one
-package is allowed explicitly in `pnpm-workspace.yaml`; nothing else is.
+package is allowed explicitly in `pnpm-workspace.yaml`. `workerd` (wrangler's runtime) is listed
+there too, but **declined** rather than allowed — see the deploy section.
 
 | Script | What it does |
 | --- | --- |
@@ -31,6 +32,7 @@ package is allowed explicitly in `pnpm-workspace.yaml`; nothing else is.
 | `pnpm headshot` | Re-crop the founder photo into `src/assets/timur.jpg` (see below) |
 | `pnpm lh` | Lighthouse against `pnpm preview`, mobile (the stricter form factor) |
 | `pnpm lh:desktop` | The same run with `--preset=desktop` |
+| `pnpm deploy` | `wrangler deploy` — publishes `dist/` to the live Worker |
 
 ## Founder photo
 
@@ -61,9 +63,10 @@ PUBLIC_FORMSPREE_ENDPOINT=https://formspree.io/f/xxxxxxxx
 ```
 
 Astro only exposes `PUBLIC_`-prefixed variables to client-side code, and the value is **inlined at
-build time** — so it must be set in the Cloudflare Pages build environment too, not just locally. If
-it is missing, the form renders and validates normally but every submission shows the error state
-pointing at `hello@tandempoint.io`.
+build time** — so it must be set in the Cloudflare build environment too, not just locally, and
+changing it there requires a redeploy rather than just a save. If it is missing, the form renders
+and validates normally but every submission shows the error state pointing at
+`hello@tandempoint.io`, which is why leaving it unset is safer than setting a placeholder.
 
 The endpoint reaches the browser through a `data-endpoint` attribute on the form rather than being
 referenced inside the client script. Referencing `import.meta.env` in the script lets the minifier
@@ -86,23 +89,52 @@ stable and can be named in `<link rel="preload">`; a content-hashed bundle URL c
 `src/layouts/Base.astro` carries the Cloudflare Web Analytics beacon, commented out. Paste the site
 token from the Cloudflare dashboard (Web Analytics → Manage site) in place of `TOKEN` and uncomment.
 
-Do **not** also enable the auto-injection toggle in the Pages project settings — enabling both
-injects the beacon twice and double-counts every pageview.
+Do **not** also enable any auto-injection toggle in the project settings — enabling both injects the
+beacon twice and double-counts every pageview.
 
-## Deploying to Cloudflare Pages
+## Deploying to Cloudflare Workers
+
+Deployed as a **static-assets Worker**, not Cloudflare Pages: the dashboard labels the Pages
+workflow legacy, and Cloudflare's own Astro guide now documents this path. `wrangler.jsonc` uploads
+`dist/` and serves it from the edge — there is no `main` entry point, no Worker script, and no
+`@astrojs/cloudflare` adapter, because nothing is rendered on demand.
 
 1. Push this repository to GitHub or GitLab.
-2. Cloudflare dashboard → **Workers & Pages** → **Create application** → **Pages** → **Import an
-   existing Git repository**, and pick the repo.
+2. Cloudflare dashboard → **Workers & Pages** → **Create** → **Continue with GitHub**, and pick the
+   repo.
 3. Build settings:
-   - **Framework preset:** Astro (or None)
    - **Build command:** `pnpm build`
-   - **Build output directory:** `dist`
-4. **Settings → Environment variables**, for the Production and Preview environments:
-   - `PUBLIC_FORMSPREE_ENDPOINT` = your Formspree endpoint
-5. Deploy. Every push to the default branch rebuilds and redeploys; other branches get preview URLs.
+   - **Deploy command:** `pnpm deploy`
+   - Leave the **non-production branch deploy command** at its `npx wrangler versions upload`
+     default. Overriding it to `wrangler deploy` would make every branch push publish to the live
+     site instead of producing a preview version.
+4. **Settings → Variables and Secrets**, for the Production and Preview environments:
+   - `PNPM_VERSION` = `11.17.0`. Not optional: the build image ships pnpm 10.11.1, which does not
+     understand the `allowBuilds` key, so it blocks esbuild's postinstall and the install fails.
+     The image does not read `packageManager` from `package.json`.
+   - `PUBLIC_FORMSPREE_ENDPOINT` = your Formspree endpoint, once the form is wired up.
+   - Node needs no variable — `.node-version` covers it, and the docs do not say which wins if a
+     version file and `NODE_VERSION` disagree, so only one of them is set.
+5. Deploy. Every push to the default branch rebuilds and redeploys.
 6. **Custom domains** → add `tandempoint.io` (and `www` if you want it redirected). Cloudflare
    issues the certificate.
+
+### Why `workerd` is declined rather than allowed
+
+`wrangler` pulls in `workerd`, whose postinstall downloads a ~150 MB binary over the network at
+install time. That binary is the local Workers runtime, used by `wrangler dev`. Deploying static
+assets never runs it: `wrangler deploy` was tested here with the script blocked and no binary
+present, and works. So `pnpm-workspace.yaml` sets `workerd: false` — pnpm still needs the decision
+declared (an undeclared build script fails the install), but nothing is executed and nothing is
+downloaded. Allowing it would cost 149 MB on every build for no benefit.
+
+`wrangler` itself is pinned as a devDependency rather than run through `npx`, so the version is
+reviewed in git rather than buried in a dashboard field. It is held one release behind latest when
+necessary: pnpm 11 refuses packages published within its minimum release age, and forcing a
+same-week release through that gate is not worth doing to skip a patch version.
+
+Telemetry is off via `send_metrics: false` in `wrangler.jsonc`. Confirm with
+`pnpm exec wrangler telemetry status`.
 
 After the first deploy, update `site` in `astro.config.mjs` if the canonical host ever changes — it
 is what generates the canonical URL, the absolute OG image URL, and `sitemap-index.xml`.
