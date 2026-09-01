@@ -8,20 +8,24 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
+    "lh": "lighthouse http://localhost:4322 --only-categories=performance,accessibility --quiet --chrome-flags=\"--headless\" --output=json --output-path=stdout",
+    "lh:desktop": "lighthouse http://localhost:4322 --preset=desktop --only-categories=performance,accessibility --quiet --chrome-flags=\"--headless\" --output=json --output-path=stdout",
     "fonts": "node scripts/fonts.mjs",
-    "og": "node scripts/og.mjs"
+    "og": "node scripts/og.mjs",
+    "headshot": "node scripts/headshot.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "3.7.4",
     "@tailwindcss/vite": "4.3.3",
     "astro": "7.2.10",
+    "sharp": "0.35.4",
     "tailwindcss": "4.3.3"
   },
   "devDependencies": {
     "@fontsource-variable/inter": "5.3.0",
-    "@fontsource/inter": "5.3.0",
     "@fontsource/instrument-sans": "5.3.0",
-    "satori": "0.33.4",
-    "sharp": "0.35.4"
+    "@fontsource/inter": "5.3.0",
+    "lighthouse": "13.4.1",
+    "satori": "0.33.4"
   }
 }

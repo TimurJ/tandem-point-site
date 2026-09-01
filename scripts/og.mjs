@@ -28,7 +28,7 @@ const MUTED = '#9A9AA4';
 const ACCENT = '#3FB6A8';
 
 const WORDMARK = 'Tandempoint';
-const TAGLINE = 'Influencer marketing for developer tools.';
+const TAGLINE = 'Influencer Marketing for Developer Tools.';
 
 const display = await readFile(
   resolve(root, 'node_modules/@fontsource/instrument-sans/files/instrument-sans-latin-600-normal.woff'),

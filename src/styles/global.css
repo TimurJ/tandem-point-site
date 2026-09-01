@@ -10,10 +10,16 @@
   --color-surface: #0f0f11;
   --color-border: #1e1e22;          /* decorative rules only — 1.19:1, never a control boundary */
   --color-control-border: #62626c;  /* form controls — 3.28:1, meets WCAG 1.4.11 non-text */
-  --color-text: #ededef;            /* 16.93:1 on --color-bg */
-  --color-muted: #9a9aa4;           /*  7.10:1 on --color-bg */
+  --color-heading: #ffffff;         /* 19.79:1 on --color-bg — h1, h2, h3 */
+  --color-heading-warm: #f7f1e9;    /* 17.64:1 — h1 gradient terminus only */
+  --color-text: #ededef;            /* 16.93:1 on --color-bg — founder note body */
+  --color-muted: #adadb7;           /*  8.89:1 on --color-bg — body copy */
   --color-accent: #3fb6a8;          /*  7.98:1 on --color-bg */
   --color-accent-ink: #04211f;      /*  6.82:1 on --color-accent */
+
+  /* Supporting tone: 4% accent mixed into --color-surface, resolved to a literal so the ratios
+     below are the ratios that actually ship. Body copy 8.20:1, white 18.25:1, accent 7.36:1. */
+  --color-surface-accent: #111617;
 
   /* type */
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
@@ -70,6 +76,10 @@
   html {
     -webkit-text-size-adjust: 100%;
     scroll-behavior: smooth;
+    /* The hero glow is centred on the art and is wider than the column, so at narrow desktop
+       widths it reaches past the viewport. `clip` (not `hidden`) stops the page scrolling
+       sideways without creating a scroll container, which would break the sticky nav. */
+    overflow-x: clip;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -84,6 +94,9 @@
     font-family: var(--font-sans);
     font-size: var(--text-body);
     line-height: var(--text-body--line-height);
+    /* Set on both html and body: on the root alone Chromium still let the page scroll sideways
+       (measured 104px at a 1024 viewport). */
+    overflow-x: clip;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
     position: relative;
@@ -104,7 +117,7 @@
     background-image:
       repeating-linear-gradient(to right, var(--color-border) 0 1px, transparent 1px 64px),
       repeating-linear-gradient(to bottom, var(--color-border) 0 1px, transparent 1px 64px);
-    mask-image: linear-gradient(to bottom, rgb(0 0 0 / 0.5), transparent 85%);
+    mask-image: linear-gradient(to bottom, rgb(0 0 0 / 0.25), transparent 85%);
   }
 
   /* Noise, tiled at 160px. Deliberately a small repeating tile: a viewport-sized feTurbulence
@@ -130,10 +143,102 @@
     background-color: var(--color-accent);
     color: var(--color-accent-ink);
   }
+
+  /* The nav is sticky, so anchor jumps must clear it rather than land underneath. */
+  section[id] {
+    scroll-margin-top: 5rem;
+  }
 }
 
 @utility wordmark {
   font-family: var(--font-display);
   font-weight: 600;
   letter-spacing: var(--tracking-wordmark);
+}
+
+/* Soft teal depth behind the hero. A radial gradient is already smooth — no filter: blur(), which
+   would cost a full-size blur pass on every paint for almost no visible difference. */
+@utility hero-glow {
+  background-image: radial-gradient(
+    closest-side,
+    color-mix(in oklab, var(--color-accent) 14%, transparent),
+    color-mix(in oklab, var(--color-accent) 4%, transparent) 55%,
+    transparent 100%
+  );
+}
+
+/* The only gradient text on the page. Both the prefixed and unprefixed background-clip are written
+   out rather than left to a utility's output. */
+@utility heading-gradient {
+  background-image: linear-gradient(
+    180deg,
+    var(--color-heading) 0%,
+    var(--color-heading-warm) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ------------------------------------------------------------------------------------------
+   Motion. Everything animated sits behind prefers-reduced-motion: no-preference, and every
+   animated property is opacity or transform so nothing can trigger layout.
+   ------------------------------------------------------------------------------------------ */
+@keyframes draw-link {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes pulse-node {
+  0%,
+  100% {
+    opacity: 0.14;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* pathLength="1" on the path normalises its length, so the dash maths needs no JS measurement. */
+  .hero-link {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: draw-link 1.2s ease-out 0.2s forwards;
+  }
+
+  /* Opacity on a halo circle, never the r attribute: animating geometry re-rasterises every frame.
+     Starts at 1.4s so the pulse begins only once the path has finished drawing. */
+  .hero-pulse {
+    animation: pulse-node 3s ease-in-out 1.4s infinite;
+  }
+}
+
+/* Scroll reveal. The initial hidden state is gated on scripting: enabled (Baseline since December
+   2023) — a browser that does not support the query simply never hides the content, which is the
+   safe direction to fail in. */
+@media (scripting: enabled) {
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+[data-reveal].is-revealed {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 400ms ease-out,
+    transform 400ms ease-out;
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+/* This block is what makes it safe for the reveal script to opt out entirely under reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
 }

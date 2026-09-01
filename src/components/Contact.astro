@@ -19,9 +19,15 @@ const fields = [
   class="mx-auto max-w-page border-t border-border px-6 py-section-sm md:px-8 md:py-section"
   aria-labelledby="contact-heading"
 >
-  <h2 id="contact-heading" class="wordmark text-h2 text-text">Get in touch</h2>
+  <h2
+    id="contact-heading"
+    data-reveal
+    class="wordmark border-l border-accent pl-6 text-h2 text-heading md:pl-8"
+  >
+    Get in touch
+  </h2>
 
-  <p class="mt-4 max-w-[54ch] text-body text-muted">
+  <p data-reveal style="--reveal-delay: 80ms" class="mt-4 max-w-[54ch] text-body text-muted">
     Tell us about your product and the developers you want in front of it. We read and reply to
     everything.
   </p>
@@ -40,7 +46,7 @@ const fields = [
               type={field.type}
               autocomplete={field.autocomplete}
               required
-              class="mt-2 w-full rounded-[var(--radius-card)] border border-control-border bg-surface px-3 py-2.5 text-body text-text outline-none transition-colors focus:border-accent"
+              class="mt-2 w-full rounded-[var(--radius-card)] border border-control-border bg-surface px-3 py-2.5 text-body text-text transition-[border-color,box-shadow] duration-150 outline-none focus-visible:border-accent focus-visible:shadow-[0_0_0_3px_color-mix(in_oklab,var(--color-accent)_25%,transparent)] focus-visible:outline-none"
             />
           </div>
         ))
@@ -53,7 +59,7 @@ const fields = [
           name="message"
           rows="5"
           required
-          class="mt-2 w-full resize-y rounded-[var(--radius-card)] border border-control-border bg-surface px-3 py-2.5 text-body text-text outline-none transition-colors focus:border-accent"
+          class="mt-2 w-full resize-y rounded-[var(--radius-card)] border border-control-border bg-surface px-3 py-2.5 text-body text-text transition-[border-color,box-shadow] duration-150 outline-none focus-visible:border-accent focus-visible:shadow-[0_0_0_3px_color-mix(in_oklab,var(--color-accent)_25%,transparent)] focus-visible:outline-none"
         ></textarea>
       </div>
     </div>
@@ -61,7 +67,7 @@ const fields = [
     <button
       type="submit"
       id="contact-submit"
-      class="mt-8 inline-flex items-center rounded-[var(--radius-card)] bg-accent px-5 py-3 text-small font-medium text-accent-ink transition-opacity hover:opacity-90 disabled:opacity-60"
+      class="mt-8 inline-flex items-center rounded-[var(--radius-card)] bg-accent px-5 py-3 text-small font-medium text-accent-ink transition-[transform,filter,opacity] duration-150 hover:-translate-y-px hover:brightness-110 disabled:translate-y-0 disabled:opacity-60 disabled:brightness-100"
     >
       Send message
     </button>
@@ -79,7 +85,7 @@ const fields = [
   <p class="mt-8 text-small text-muted">
     or email <a
       href="mailto:hello@tandempoint.io"
-      class="text-accent underline underline-offset-4 transition-opacity hover:opacity-80"
+      class="relative inline-block text-accent underline decoration-accent/40 underline-offset-4 after:absolute after:bottom-[-0.3em] after:left-0 after:h-px after:w-full after:origin-left after:scale-x-0 after:bg-accent after:transition-transform after:duration-300 after:ease-out hover:after:scale-x-100 focus-visible:after:scale-x-100"
       >hello@tandempoint.io</a
     >
   </p>
@@ -130,7 +136,7 @@ const fields = [
 
         if (response.ok) {
           form.hidden = true;
-          status.textContent = 'Thanks — your message is in. We will reply from hello@tandempoint.io.';
+          status.textContent = 'Thanks. Your message is in, and we will reply from hello@tandempoint.io.';
           status.classList.add('text-accent');
           status.focus();
           return;

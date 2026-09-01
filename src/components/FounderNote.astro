@@ -1,4 +1,6 @@
 ---
+import { Image } from 'astro:assets';
+import portrait from '../assets/timur.jpg';
 ---
 
 <section
@@ -8,17 +10,42 @@
 >
   <h2 id="founder-note-heading" class="sr-only">A note from the founder</h2>
 
-  <figure class="max-w-[62ch] border-l border-accent pl-6 md:pl-8">
-    <blockquote>
-      <p class="text-lead text-text">
-        I spent years as a senior front-end engineer before starting Tandempoint. That is the
-        reason it works this way: I can read your documentation and tell whether a creator will
-        have a good hour with your product, and I can watch a creator's back catalogue and tell
-        whether they know what they are talking about. It also means there is no account-manager
-        layer here — you talk to me, and I talk to the creators. Small and direct is the point,
-        not a limitation.
-      </p>
-    </blockquote>
+  <!--
+    The max-width grows at md by exactly the photo column (7rem photo + 1.5rem gap). Without that,
+    the photo takes its width out of the quote rather than out of the page, and the measure drops
+    below the point where a paragraph stays comfortable to read.
+  -->
+  <figure
+    data-reveal
+    class="max-w-[62ch] rounded-r-[var(--radius-card)] border-l border-accent bg-surface-accent p-6 md:max-w-[calc(62ch+8.5rem)] md:p-8"
+  >
+    <div class="flex flex-col gap-5 md:flex-row md:gap-6">
+      <!--
+        shrink-0 matters: without it the flex item is allowed to compress and the circle renders as
+        an ellipse once the quote competes for width.
+      -->
+      <Image
+        src={portrait}
+        alt="Timur Jalilov"
+        width={112}
+        height={112}
+        densities={[2]}
+        format="webp"
+        loading="lazy"
+        class="size-28 shrink-0 rounded-full border border-accent object-cover"
+      />
+
+      <blockquote>
+        <p class="text-lead text-text">
+          I spent years as a senior front-end engineer before starting Tandempoint. That is the
+          reason it works this way: I can read your documentation and tell whether a creator will
+          have a good hour with your product, and I can watch a creator's back catalogue and tell
+          whether they know what they are talking about. It also means there is no account-manager
+          layer here. You talk to me, and I talk to the creators. Small and direct is the point,
+          not a limitation.
+        </p>
+      </blockquote>
+    </div>
 
     <figcaption class="mt-6 text-small text-muted">Timur Jalilov, Founder</figcaption>
   </figure>

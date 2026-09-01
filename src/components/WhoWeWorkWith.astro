@@ -24,13 +24,19 @@ const columns = [
   class="mx-auto max-w-page border-t border-border px-6 py-section-sm md:px-8 md:py-section"
   aria-labelledby="who-we-work-with-heading"
 >
-  <h2 id="who-we-work-with-heading" class="wordmark text-h2 text-text">Who we work with</h2>
+  <h2
+    id="who-we-work-with-heading"
+    data-reveal
+    class="wordmark border-l border-accent pl-6 text-h2 text-heading md:pl-8"
+  >
+    Who we work with
+  </h2>
 
   <div class="mt-12 grid gap-10 md:grid-cols-2 md:gap-16">
     {
-      columns.map((column) => (
-        <div class="border-t border-border pt-6">
-          <h3 class="wordmark text-lead text-text">{column.title}</h3>
+      columns.map((column, i) => (
+        <div data-reveal style={`--reveal-delay: ${(i + 1) * 80}ms`} class="border-t border-border pt-6">
+          <h3 class="wordmark text-lead text-heading">{column.title}</h3>
           <div class="mt-4 space-y-3 text-body text-muted">
             {column.lines.map((line) => (
               <p>{line}</p>

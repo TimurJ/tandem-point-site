@@ -28,6 +28,26 @@ package is allowed explicitly in `pnpm-workspace.yaml`; nothing else is.
 | `pnpm preview` | Serve `dist/` locally |
 | `pnpm fonts` | Re-copy the two woff2 files from `node_modules` into `public/fonts` |
 | `pnpm og` | Regenerate `public/og.png`, `wordmark.svg`, `favicon.svg` |
+| `pnpm headshot` | Re-crop the founder photo into `src/assets/timur.jpg` (see below) |
+| `pnpm lh` | Lighthouse against `pnpm preview`, mobile (the stricter form factor) |
+| `pnpm lh:desktop` | The same run with `--preset=desktop` |
+
+## Founder photo
+
+`src/assets/timur.jpg` is a 512x512 crop, committed. It lives in `src/` rather than `public/`
+deliberately: Astro copies `public/` byte-for-byte with no processing, so a file there is never
+resized or converted, while `src/` assets go through `astro:assets` and ship as WebP (about 1.5 KB
+at 1x, 3.7 KB at 2x). No JPEG is ever served.
+
+`pnpm headshot` regenerates that crop from the original camera file, which is **gitignored** — it is
+~4 MB, so unlike `pnpm og` this is not reproducible from a fresh clone. The committed output is what
+matters; the script is a record of the measured crop box. Point it at a new original with:
+
+```
+pnpm headshot -- path/to/original.jpg
+```
+
+It fails loudly rather than mis-cropping if the new file is too small for the stored crop box.
 
 ## Contact form
 
