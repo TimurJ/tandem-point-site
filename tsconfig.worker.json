@@ -1,0 +1,15 @@
+{
+  // src/worker.ts is checked here rather than by the root config, and excluded there.
+  //
+  // The root config extends astro/tsconfigs/strict, which carries the DOM lib the client script
+  // needs. The Workers globals redeclare a good deal of that surface, so loading both in one
+  // program produces conflicting definitions. Two programs, one lib each, is the clean split.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["@cloudflare/workers-types"]
+  },
+  // `exclude` is inherited, and the root excludes src/worker.ts — which would leave this config
+  // with no inputs at all. Clearing it is what makes the one file below visible here.
+  "exclude": [],
+  "include": ["src/worker.ts"]
+}

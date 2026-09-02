@@ -16,6 +16,10 @@ node_modules/
 .env.local
 .env.*.local
 
+# wrangler dev secrets: holds the live RESEND_API_KEY, and the .env rules above do not cover it
+.dev.vars
+.dev.vars.*
+
 # logs
 *.log
 npm-debug.log*

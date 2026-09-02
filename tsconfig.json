@@ -1,5 +1,7 @@
 {
   "extends": "astro/tsconfigs/strict",
   "include": [".astro/types.d.ts", "**/*"],
-  "exclude": ["dist"]
+  // src/worker.ts is checked by tsconfig.worker.json instead: it needs the Workers globals, which
+  // conflict with the DOM lib this config loads for the client script.
+  "exclude": ["dist", "src/worker.ts"]
 }

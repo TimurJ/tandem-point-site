@@ -1,11 +1,29 @@
 {
-  // Static-assets-only Worker: dist/ is uploaded and served from the edge. There is no `main`
-  // and no Worker script. Cloudflare's own Astro guide specifies exactly this shape for a
-  // static build. This is the Workers path, not the (legacy) Pages one.
+  // Static-assets Worker: dist/ is uploaded and served from the edge, and `main` adds one small
+  // script for the single dynamic route (POST /api/contact). The site itself is still fully
+  // static; nothing is rendered on demand and there is no @astrojs/cloudflare adapter.
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "tandem-point-site",
-  "compatibility_date": "2026-09-02",
+  "main": "src/worker.ts",
+  // 2026-09-01, not 2026-09-02. A compatibility date is only meaningful up to the newest one the
+  // runtime knows, and no released workerd supports 09-02 yet: the local runtime refuses to start
+  // ("the newest date supported by this server binary is 2026-09-01"), and even wrangler 4.128.0
+  // still bundles workerd 1.20260831.1. This went unnoticed while there was no Worker script to
+  // run. Raise it when a runtime that supports a later date ships.
+  "compatibility_date": "2026-09-01",
   "send_metrics": false,
+
+  // Deliberately here rather than in the dashboard. Wrangler treats this file as the source of
+  // truth and DELETES vars it does not find here on every deploy (see `keep_vars` in
+  // config-schema.json), so a dashboard edit to either value would silently revert on the next
+  // `pnpm deploy`. Secrets are exempt from that, which is why RESEND_API_KEY is a secret and
+  // these two are not. Point CONTACT_FROM at noreply@tandempoint.io once the domain is verified
+  // in Resend, then redeploy.
+  "vars": {
+    "CONTACT_FROM": "Tandempoint <onboarding@resend.dev>",
+    "CONTACT_TO": "hello@tandempoint.io"
+  },
+
   "assets": {
     "directory": "./dist"
 
@@ -13,5 +31,10 @@
     // ("auto-trailing-slash" and "none"). Do NOT set not_found_handling to
     // "single-page-application": it returns index.html with a 200 for every unknown URL, which
     // would let search engines index infinite duplicates of the homepage.
+    //
+    // run_worker_first is deliberately absent. The default is asset-first: Cloudflare serves a
+    // matching static asset and only invokes the Worker when there is none. /api/contact is not
+    // a file in dist/, so it reaches the Worker without turning every page request into a Worker
+    // invocation.
   }
 }

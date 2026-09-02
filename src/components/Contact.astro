@@ -1,12 +1,7 @@
 ---
-// Read at build time and passed to the client through a data attribute rather than referenced
-// directly inside the <script>. Referencing import.meta.env in the client script lets Vite inline
-// the literal `undefined` when the variable is unset, and the minifier then strips the whole
-// submit path as dead code, so an unconfigured build would ship a form whose success branch does
-// not exist. A data attribute keeps one stable bundle whatever the environment.
-// The value is public by design: Formspree endpoints are meant to be visible in the page.
-const formspreeEndpoint = import.meta.env.PUBLIC_FORMSPREE_ENDPOINT ?? '';
-
+// The form posts to /api/contact on this same origin, served by src/worker.ts. There is no
+// build-time configuration left: the endpoint is a fixed path and the Resend key never leaves
+// the Worker.
 const fields = [
   { id: 'name', label: 'Name', type: 'text', autocomplete: 'name' },
   { id: 'company', label: 'Company', type: 'text', autocomplete: 'organization' },
@@ -32,7 +27,7 @@ const fields = [
     everything.
   </p>
 
-  <form id="contact-form" class="mt-10 max-w-[34rem]" data-endpoint={formspreeEndpoint}>
+  <form id="contact-form" class="mt-10 max-w-[34rem]">
     <div class="grid gap-5">
       {
         fields.map((field) => (
@@ -61,6 +56,14 @@ const fields = [
           required
           class="mt-2 w-full resize-y rounded-[var(--radius-card)] border border-control-border bg-surface px-3 py-2.5 text-body text-text transition-[border-color,box-shadow] duration-150 outline-none focus-visible:border-accent focus-visible:shadow-[0_0_0_3px_color-mix(in_oklab,var(--color-accent)_25%,transparent)] focus-visible:outline-none"
         ></textarea>
+      </div>
+
+      {/* Honeypot. sr-only takes it out of the layout without display:none, which some bots skip;
+          aria-hidden and tabindex -1 keep it away from screen readers and the tab order. The
+          Worker silently discards any submission that fills it in. */}
+      <div aria-hidden="true" class="sr-only">
+        <label for="website">Website</label>
+        <input id="website" name="website" type="text" tabindex="-1" autocomplete="off" />
       </div>
     </div>
 
@@ -105,10 +108,6 @@ const fields = [
 
       if (!form.reportValidity()) return;
 
-      // Read per-submit rather than once at load: same result in production, and it keeps the
-      // branch reachable from a test that sets the attribute.
-      const endpoint = form.dataset.endpoint;
-
       status.textContent = '';
       status.classList.remove('text-accent');
       submit.disabled = true;
@@ -122,16 +121,18 @@ const fields = [
         status.focus();
       };
 
-      if (!endpoint) {
-        fail(GENERIC_ERROR);
-        return;
-      }
-
       try {
-        const response = await fetch(endpoint, {
+        const entered = new FormData(form);
+        const response = await fetch('/api/contact', {
           method: 'POST',
-          body: new FormData(form),
-          headers: { Accept: 'application/json' },
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({
+            name: entered.get('name'),
+            company: entered.get('company'),
+            email: entered.get('email'),
+            message: entered.get('message'),
+            website: entered.get('website'),
+          }),
         });
 
         if (response.ok) {
@@ -142,12 +143,11 @@ const fields = [
           return;
         }
 
-        const data = await response.json().catch(() => null);
-        const messages = Array.isArray(data?.errors)
-          ? data.errors.map((error: { message?: string }) => error.message).filter(Boolean)
-          : [];
+        // The Worker answers with { error } on a validation failure; anything it cannot phrase
+        // usefully (rate limit, upstream failure) already carries the generic copy.
+        const body = (await response.json().catch(() => null)) as { error?: string } | null;
 
-        fail(messages.length > 0 ? messages.join(', ') : GENERIC_ERROR);
+        fail(typeof body?.error === 'string' && body.error ? body.error : GENERIC_ERROR);
       } catch {
         fail(GENERIC_ERROR);
       }
