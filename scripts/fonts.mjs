@@ -18,12 +18,12 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const out = resolve(root, 'public/fonts');
 
 const files = [
-  // Inter variable (weight axis), latin subset — body text.
+  // Inter variable (weight axis), latin subset: body text.
   [
     'node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2',
     'inter-latin-wght-normal.woff2',
   ],
-  // Instrument Sans 600, latin subset — wordmark and headings.
+  // Instrument Sans 600, latin subset: wordmark and headings.
   [
     'node_modules/@fontsource/instrument-sans/files/instrument-sans-latin-600-normal.woff2',
     'instrument-sans-600.woff2',

@@ -3,7 +3,7 @@
  *
  * satori lays out the nodes and emits glyph outlines (embedFont defaults to true), so the SVGs
  * carry <path> data and render correctly on a machine with no fonts installed. sharp rasterises
- * the OG SVG to PNG — its prebuilt libvips bundles librsvg, so no extra native dependency.
+ * the OG SVG to PNG; its prebuilt libvips bundles librsvg, so no extra native dependency.
  *
  * satori accepts TTF, OTF and WOFF but NOT WOFF2, which is why this reads the .woff files from
  * the static @fontsource packages rather than the variable ones we actually serve.

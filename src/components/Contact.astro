@@ -2,7 +2,7 @@
 // Read at build time and passed to the client through a data attribute rather than referenced
 // directly inside the <script>. Referencing import.meta.env in the client script lets Vite inline
 // the literal `undefined` when the variable is unset, and the minifier then strips the whole
-// submit path as dead code — so an unconfigured build would ship a form whose success branch does
+// submit path as dead code, so an unconfigured build would ship a form whose success branch does
 // not exist. A data attribute keeps one stable bundle whatever the environment.
 // The value is public by design: Formspree endpoints are meant to be visible in the page.
 const formspreeEndpoint = import.meta.env.PUBLIC_FORMSPREE_ENDPOINT ?? '';

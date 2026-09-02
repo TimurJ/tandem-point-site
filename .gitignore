@@ -21,7 +21,7 @@ node_modules/
 npm-debug.log*
 pnpm-debug.log*
 
-# original camera files — the cropped, committed derivative is src/assets/timur.jpg
+# original camera files: the cropped, committed derivative is src/assets/timur.jpg
 IMG_*.jpg
 IMG_*.JPG
 

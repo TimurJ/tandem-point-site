@@ -34,7 +34,7 @@ const ogImage = new URL('/og.png', Astro.site).href;
     <meta property="og:image" content={ogImage} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Tandempoint — Influencer Marketing for Developer Tools" />
+    <meta property="og:image:alt" content="Tandempoint – Influencer Marketing for Developer Tools" />
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
@@ -88,7 +88,7 @@ const ogImage = new URL('/og.png', Astro.site).href;
         const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
         // Under reduced motion the CSS already forces every [data-reveal] visible, so the observer
-        // has nothing to do. The nav state still runs below — a background change is not motion.
+        // has nothing to do. The nav state still runs below. A background change is not motion.
         if (!reduceMotion) {
           const observer = new IntersectionObserver(
             (entries) => {

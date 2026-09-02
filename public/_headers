@@ -7,12 +7,12 @@
 # cache would strand a rebrand behind stale copies.
 #
 # A line is treated as a new path rule purely by starting with "/", so never add a header whose
-# value begins with a slash here — it would be reparsed as a path and swallow the rules below it.
+# value begins with a slash here. It would be reparsed as a path and swallow the rules below it.
 
 /_astro/*
   Cache-Control: public, max-age=31536000, immutable
 
 # Not hash-named, unlike /_astro/*: the filename encodes weight and variant. If a font is ever
-# replaced, rename the file — which the <link rel="preload"> in Base.astro requires anyway.
+# replaced, rename the file, which the <link rel="preload"> in Base.astro requires anyway.
 /fonts/*
   Cache-Control: public, max-age=31536000, immutable

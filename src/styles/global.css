@@ -8,12 +8,12 @@
   /* colour */
   --color-bg: #0a0a0b;
   --color-surface: #0f0f11;
-  --color-border: #1e1e22;          /* decorative rules only — 1.19:1, never a control boundary */
-  --color-control-border: #62626c;  /* form controls — 3.28:1, meets WCAG 1.4.11 non-text */
-  --color-heading: #ffffff;         /* 19.79:1 on --color-bg — h1, h2, h3 */
-  --color-heading-warm: #f7f1e9;    /* 17.64:1 — h1 gradient terminus only */
-  --color-text: #ededef;            /* 16.93:1 on --color-bg — founder note body */
-  --color-muted: #adadb7;           /*  8.89:1 on --color-bg — body copy */
+  --color-border: #1e1e22;          /* decorative rules only; 1.19:1, never a control boundary */
+  --color-control-border: #62626c;  /* form controls; 3.28:1, meets WCAG 1.4.11 non-text */
+  --color-heading: #ffffff;         /* 19.79:1 on --color-bg; h1, h2, h3 */
+  --color-heading-warm: #f7f1e9;    /* 17.64:1; h1 gradient terminus only */
+  --color-text: #ededef;            /* 16.93:1 on --color-bg; founder note body */
+  --color-muted: #adadb7;           /*  8.89:1 on --color-bg; body copy */
   --color-accent: #3fb6a8;          /*  7.98:1 on --color-bg */
   --color-accent-ink: #04211f;      /*  6.82:1 on --color-accent */
 
@@ -156,8 +156,8 @@
   letter-spacing: var(--tracking-wordmark);
 }
 
-/* Soft teal depth behind the hero. A radial gradient is already smooth — no filter: blur(), which
-   would cost a full-size blur pass on every paint for almost no visible difference. */
+/* Soft teal depth behind the hero. A radial gradient is already smooth, so no filter: blur(),
+   which would cost a full-size blur pass on every paint for almost no visible difference. */
 @utility hero-glow {
   background-image: radial-gradient(
     closest-side,
@@ -216,7 +216,7 @@
 }
 
 /* Scroll reveal. The initial hidden state is gated on scripting: enabled (Baseline since December
-   2023) — a browser that does not support the query simply never hides the content, which is the
+   2023). A browser that does not support the query simply never hides the content, which is the
    safe direction to fail in. */
 @media (scripting: enabled) {
   [data-reveal] {

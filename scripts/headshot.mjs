@@ -2,22 +2,22 @@
  * Crop the founder headshot to the square used by the founder note.
  *
  * The original is a 6240x4160 *landscape* greyscale frame, ~4 MB, with EXIF and an ICC profile.
- * None of that can go in public/ — Astro copies public/ byte-for-byte with no processing, so a file
+ * None of that can go in public/: Astro copies public/ byte-for-byte with no processing, so a file
  * there is never resized, converted or hashed. The cropped output goes to src/assets/ instead, where
  * astro:assets can transform it at build time.
  *
  * The crop box is measured, not eyeballed: the image was thresholded at 1/20 scale and scanned row
  * by row for the subject's horizontal extent, which put the head centre at x=3040 (stable across 20
  * rows), the top of the hair at y=280 and the chin at y=2360. The box below centres that head and
- * leaves ~10% headroom above the hair, so the head fills roughly three quarters of the circle — the
- * framing that still reads at 64px.
+ * leaves ~10% headroom above the hair, so the head fills roughly three quarters of the circle (the
+ * framing that still reads at 64px).
  *
  * `orientation: 1` on the source, so there is no EXIF rotation to compensate for and the crop box is
  * the pixel box.
  *
  * Output is committed, so this only needs re-running if the source photo changes. Note that the
  * original is gitignored (it is 4 MB), so unlike `pnpm og` this is not reproducible from a fresh
- * clone — it is a record of the crop numbers.
+ * clone: it is a record of the crop numbers.
  *
  * Run: pnpm headshot
  */
@@ -48,7 +48,7 @@ if (
 ) {
   throw new Error(
     `Crop box ${CROP.width}x${CROP.height} at (${CROP.left},${CROP.top}) does not fit in ` +
-      `${meta.width}x${meta.height}. The source changed — re-measure before trusting these numbers.`,
+      `${meta.width}x${meta.height}. The source changed. Re-measure before trusting these numbers.`,
   );
 }
 
